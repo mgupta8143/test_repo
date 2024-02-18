@@ -23,34 +23,36 @@ jobs:
         run: |
           pip install requests
 
-      - name: Generate Code Review Comments
-        run: |
-          COMMENTS=$(curl -s -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -d @- https://api.openai.com/v1/chat/completions << 'EOF'
-{
-  "model": "ft:gpt-3.5-turbo-0613:personal::8tY7NID9",
-  "messages": [
-    {
-      "role": "system",
-      "content": "You are a code reviewer. Your job is to take code as input and leave comments to improve it. \n\nMake sure that when you make code reviews, you format it in a list with a line number. Remove any \\n characters to make it clear.\n\nBe very critical and try making improvements in the code and nits. If there are no changes to be made, that is fine too. Also get rid of the Done at the end of your reviews."
-    },
-    {
-      "role": "user",
-      "content": "${{ github.event.pull_request.body }}"
-    },
-    {
-      "role": "assistant",
-      "content": "['${{ github.event.pull_request.body }}']"
-    }
-  ],
-  "temperature": 1.2,
-  "max_tokens": 373,
-  "top_p": 0.81,
-  "frequency_penalty": 0.1,
-  "presence_penalty": 0.14
-}
-EOF
+          - name: Generate Code Review Comments
+          run: |
+            COMMENTS=$(curl -s -H "Content-Type: application/json" \
+              -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+              -d @- https://api.openai.com/v1/chat/completions << 'EOF'
+            {
+              "model": "ft:gpt-3.5-turbo-0613:personal::8tY7NID9",
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are a code reviewer. Your job is to take code as input and leave comments to improve it. \n\nMake sure that when you make code reviews, you format it in a list with a line number. Remove any \\n characters to make it clear.\n\nBe very critical and try making improvements in the code and nits. If there are no changes to be made, that is fine too. Also get rid of the Done at the end of your reviews."
+                },
+                {
+                  "role": "user",
+                  "content": "${{ github.event.pull_request.body }}"
+                },
+                {
+                  "role": "assistant",
+                  "content": "['${{ github.event.pull_request.body }}']"
+                }
+              ],
+              "temperature": 1.2,
+              "max_tokens": 373,
+              "top_p": 0.81,
+              "frequency_penalty": 0.1,
+              "presence_penalty": 0.14
+            }
+            EOF
+            )
+        
           )
 
       - name: Post Code Review Comments
